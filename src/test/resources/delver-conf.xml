@@ -1,0 +1,14 @@
+<!-- Delver example XML config. -->
+<delver verbose="true">
+    <include>
+        <pattern>nl/omgwtfbbq/delver/conf</pattern>
+        <pattern>nl/omgwtfbbq/delver/conf/cruft/*$</pattern>
+        <pattern>nl/omgwtfbbq/delver/other</pattern>
+        <pattern>[z</pattern> <!-- this one should fail compiling. -->
+        <pattern>org.example.*.anything.*</pattern>
+    </include>
+    <exclude>
+        <pattern>nl/skipthis</pattern>
+        <pattern>nl/andthis/skip/too</pattern>
+    </exclude>
+</delver>
