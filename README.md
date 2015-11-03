@@ -45,3 +45,9 @@ The configuration file will include and exclude certain packages which are match
 Note that if you want to include a package for monitoring, you **MUST** provide an explicit
 inclusion. Also, exclusions take precedence over inclusions, so if an exclusion is evaluated,
 an inclusion matching the same regex will not have any effect.
+
+If you try monitoring a JVM with for example VisualVM, and the message
+
+> 'Data not available because JMX connection to the JMX agent could not be established'
+
+is shown, try running the JVM with the `-Dcom.sun.management.jmxremote` parameter.
