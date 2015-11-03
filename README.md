@@ -13,14 +13,28 @@ Perhaps there are better ways (static analysis) but our project uses weird
 combinations of Struts 1.0, tag libraries, and finding methods through reflection
 and what not. Many calls could not be checked using a static analysis.
 
+# Building
+Build it with `mvn clean install`. It will produce a shaded 'uber JAR' which
+contains the agent code, plus the [javassist](http://www.javassist.org) code
+dependency.
+
 # Running
 
-Build it with `mvn clean install`. It will produce a shaded 'uber JAR' which 
-contains the agent code, plus the [javassist](http://www.javassist.org) code 
-dependency. You can put this JAR as the Java agent in your program as follows:
+ You can put the created JAR as the Java agent in your program as follows:
 
-    java -javaagent:PATH_TO_SHADED_JAR [...]
-    
+    java -javaagent:<path to shaded jar>=<path to config file> [...]
+
+where `<path to shaded jar>` is... the path to the Delver jar file and `<path to config file>`
+is the path to the configuration file. For example:
+
+    java -javaagent:/tmp/delver-1.0-snapshot.jar=/tmp/delver-config.xml -jar myapp.jar
+
+If the configuration file cannot be found, it will report an error to stderr, and no
+instrumentation will be done. Same applies if the file is found, but cannot be read
+for whatever reason.
+
+# Configuration file
+
 The agent requires an XML configuration file to read the black- and whitelist
 from. The file takes the following format:
 
@@ -45,13 +59,7 @@ Note that if you want to include a package for monitoring, you **MUST** provide 
 inclusion. Also, exclusions take precedence over inclusions, so if an exclusion is evaluated,
 an inclusion matching the same regex will not have any effect.
 
-If you try monitoring a JVM with for example VisualVM, and the message
-
-> Data not available because JMX connection to the JMX agent could not be established
-
-is shown, try running the JVM with the `-Dcom.sun.management.jmxremote` parameter.
-
-# Getting the information
+# Gathering results
 
 The Instrumentation agent will expose functionality through the MBeanServer of the JVM
 its running in. The object name is `nl.omgwtfbbq.delver:type=MethodUsageSampler`. Currently
@@ -62,3 +70,10 @@ the MXBean exposes two functions:
 filename. Will throw an MBeanException if that failed.
 
 You can use `JConsole` or `VisualVM` to make a connection to an MBeanServer to view the stats.
+If you try monitoring a JVM with for example VisualVM, and the message
+
+> Data not available because JMX connection to the JMX agent could not be established
+
+is shown, try running the JVM with the `-Dcom.sun.management.jmxremote` parameter.
+
+

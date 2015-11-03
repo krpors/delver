@@ -7,16 +7,13 @@ import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.xml.bind.JAXBException;
-import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 
 public class DelverMain {
-
-    /**
-     * Attempt to look this up in the classpath.
-     */
-    private final static String CFG_FILE = "/delver-conf.xml";
 
     /**
      * Premain, entry for the Instrumentation API.
@@ -25,23 +22,28 @@ public class DelverMain {
      * @param inst      The Instrumentation.
      */
     public static void premain(String agentArgs, Instrumentation inst) {
-        Logger.debug("Delver initializing");
+        Logger.debug("Delver initializing. Using configuration file '%s'", agentArgs);
 
+        FileInputStream fis = null;
         try {
-            Config config = null;
-            InputStream is = DelverMain.class.getResourceAsStream(CFG_FILE);
-            if (is != null) {
-                config = Config.read(is);
-            } else {
-                Logger.warn("Unable to find '%s' on the classpath, disabling instrumentation", CFG_FILE);
-                return;
-            }
+            fis = new FileInputStream(agentArgs);
+            Config config = Config.read(fis);
 
             Logger.debug("Configuration file read successfully");
             ClassTransformer classTransformer = new ClassTransformer(config);
             inst.addTransformer(classTransformer);
         } catch (JAXBException e) {
-            Logger.error("Configuration file '%s'found, but unable to read: %s", CFG_FILE, e.getMessage());
+            Logger.error("Configuration file '%s' found, but unable to read: %s", agentArgs, e.getMessage());
+        } catch (FileNotFoundException e) {
+            Logger.error("Unable to open configuration file '%s', disabling instrumentation.", agentArgs);
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    // swallow.
+                }
+            }
         }
 
         try {
@@ -49,7 +51,10 @@ public class DelverMain {
             ObjectName on = new ObjectName("nl.omgwtfbbq.delver:type=MethodUsageSampler");
             server.registerMBean(new MethodUsageSampler(), on);
         } catch (JMException ex) {
-            Logger.error("Unable to do stuff with MBeanServer: %s", ex.getMessage());
+            Logger.error("Unable to register MXBean with MBeanServer: %s", ex.getMessage());
+        } catch (Exception ex) {
+            Logger.error("Other exception: ", ex.getMessage());
+            ex.printStackTrace();
         }
 
     }

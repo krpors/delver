@@ -10,7 +10,7 @@ import java.util.Date;
  */
 public final class Logger {
 
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public static void debug(String s, Object... args) {
         System.out.printf("[DELVER] DEBUG [%s]: %s\n",
