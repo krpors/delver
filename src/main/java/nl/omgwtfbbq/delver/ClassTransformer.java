@@ -51,8 +51,10 @@ public class ClassTransformer implements ClassFileTransformer {
                 CtMethod[] methods = cc.getDeclaredMethods();
                 System.out.printf("Altering %d methods in %s\n", methods.length, wut);
                 for (CtMethod m : methods) {
+                    String modifiers = Modifier.toString(m.getModifiers());
                     String returnType = m.getReturnType().getName();
-                    String w = String.format("{ nl.omgwtfbbq.delver.UsageCollector.instance().add(\"%s %s\"); }", returnType, m.getLongName());
+                    String w = String.format("{ nl.omgwtfbbq.delver.UsageCollector.instance().add(\"%s;%s;%s\"); }",
+                            modifiers, returnType, m.getLongName());
                     m.insertBefore(w);
 
                     System.out.printf("Inserted into method: %s\n", m.getName());

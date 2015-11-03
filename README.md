@@ -25,8 +25,7 @@ The agent requires an XML configuration file to read the black- and whitelist
 from. The file takes the following format:
 
 ```xml
-<!-- Delver example XML config. -->
-<delver verbose="true">
+<delver>
     <include>
         <pattern>nl/omgwtfbbq/delver/conf</pattern>
         <pattern>nl/omgwtfbbq/delver/conf/cruft/*$</pattern>
@@ -41,13 +40,25 @@ from. The file takes the following format:
 </delver>
 ```
 
-The configuration file will include and exclude certain packages which are match a regex.
+The configuration file will include and exclude certain packages which match a regex.
 Note that if you want to include a package for monitoring, you **MUST** provide an explicit
 inclusion. Also, exclusions take precedence over inclusions, so if an exclusion is evaluated,
 an inclusion matching the same regex will not have any effect.
 
 If you try monitoring a JVM with for example VisualVM, and the message
 
-> 'Data not available because JMX connection to the JMX agent could not be established'
+> Data not available because JMX connection to the JMX agent could not be established
 
 is shown, try running the JVM with the `-Dcom.sun.management.jmxremote` parameter.
+
+# Getting the information
+
+The Instrumentation agent will expose functionality through the MBeanServer of the JVM
+its running in. The object name is `nl.omgwtfbbq.delver:type=MethodUsageSampler`. Currently
+the MXBean exposes two functions:
+
+1. `Map<String, Integer> getCallMap()`: containing the method signature, plus the amount of calls to that method.
+1. `void writeToFile(String file)`: Attempts to write the statistics in CSV form to the specified
+filename. Will throw an MBeanException if that failed.
+
+You can use `JConsole` or `VisualVM` to make a connection to an MBeanServer to view the stats.
