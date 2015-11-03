@@ -18,6 +18,12 @@ public final class Logger {
                 String.format(s, args));
     }
 
+    public static void warn(String s, Object... args) {
+        System.out.printf("[DELVER] WARN  [%s]: %s\n",
+                SDF.format(new Date()),
+                String.format(s, args));
+    }
+
     public static void error(String s, Object... args) {
         System.err.printf("[DELVER] ERROR [%s]: %s\n",
                 SDF.format(new Date()),

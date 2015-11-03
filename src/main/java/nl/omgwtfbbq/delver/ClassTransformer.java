@@ -1,7 +1,7 @@
 package nl.omgwtfbbq.delver;
 
 import javassist.*;
-import nl.omgwtfbbq.delver.conf.*;
+import nl.omgwtfbbq.delver.conf.Config;
 
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
@@ -20,10 +20,6 @@ public class ClassTransformer implements ClassFileTransformer {
 
     public ClassTransformer(Config config) {
         this.config = config;
-
-        UsageWriter usageWriter = UsageWriter.instance();
-        usageWriter.setThreshold(config.getThreshold());
-        usageWriter.setOutputFile(config.getOutputFile());
     }
 
     public byte[] transform(ClassLoader loader, String className,
@@ -56,7 +52,7 @@ public class ClassTransformer implements ClassFileTransformer {
                 System.out.printf("Altering %d methods in %s\n", methods.length, wut);
                 for (CtMethod m : methods) {
                     String returnType = m.getReturnType().getName();
-                    String w = String.format("nl.omgwtfbbq.delver.UsageWriter.instance().add(\"%s %s\");", returnType, m.getLongName());
+                    String w = String.format("{ nl.omgwtfbbq.delver.UsageCollector.instance().add(\"%s %s\"); }", returnType, m.getLongName());
                     m.insertBefore(w);
 
                     System.out.printf("Inserted into method: %s\n", m.getName());

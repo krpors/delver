@@ -1,17 +1,19 @@
 package nl.omgwtfbbq.delver.conf;
 
-import nl.omgwtfbbq.delver.Logger;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlValue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.PatternSyntaxException;
 
 @XmlRootElement(name = "pattern")
 @XmlAccessorType(XmlAccessType.NONE)
 public class Pattern {
+
+    private static final Logger LOG = Logger.getLogger(Pattern.class.getName());
 
     private java.util.regex.Pattern regex;
 
@@ -37,10 +39,11 @@ public class Pattern {
         try {
             regex = java.util.regex.Pattern.compile(pattern);
         } catch (PatternSyntaxException ex) {
-            Logger.error("Pattern '%s' can't be compiled and will be ignored (%s at index %d)",
-                    pattern,
-                    ex.getDescription(),
-                    ex.getIndex());
+            LOG.log(Level.WARNING,
+                    "Pattern {0} can't be compiled and will be ignored ({1} at index {2})",
+                    new Object[]{pattern,
+                            ex.getDescription(),
+                            ex.getIndex()});
             valid = false;
         }
     }
