@@ -42,3 +42,6 @@ from. The file takes the following format:
 ```
 
 The configuration file will include and exclude certain packages which are match a regex.
+Note that if you want to include a package for monitoring, you **MUST** provide an explicit
+inclusion. Also, exclusions take precedence over inclusions, so if an exclusion is evaluated,
+an inclusion matching the same regex will not have any effect.

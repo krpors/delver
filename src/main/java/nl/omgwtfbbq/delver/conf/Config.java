@@ -23,15 +23,6 @@ public class Config {
     private List<Pattern> listExcludes = new ArrayList<Pattern>();
 
     /**
-     * Threshold for writing data to file.
-     */
-    @XmlAttribute(name = "threshold")
-    private int threshold;
-
-    @XmlAttribute(name = "outputFile")
-    private String outputFile;
-
-    /**
      * Creates a JAXBContext used for marshalling and unmarshalling.
      *
      * @return The context.
@@ -84,22 +75,6 @@ public class Config {
 
     public void addExclude(Pattern pkg) {
         this.listExcludes.add(pkg);
-    }
-
-    public int getThreshold() {
-        return threshold;
-    }
-
-    public void setThreshold(int threshold) {
-        this.threshold = threshold;
-    }
-
-    public String getOutputFile() {
-        return outputFile;
-    }
-
-    public void setOutputFile(String outputFile) {
-        this.outputFile = outputFile;
     }
 
     public boolean isExcluded(String classname) {
