@@ -6,7 +6,7 @@ import java.util.Map;
 
 public final class UsageCollector {
 
-    private static UsageCollector usageCollector;
+    private static UsageCollector usageCollector = new UsageCollector();
 
     private Map<String, Integer> calls = new HashMap<String, Integer>();
 
@@ -14,10 +14,6 @@ public final class UsageCollector {
     }
 
     public static UsageCollector instance() {
-        if (usageCollector == null) {
-            usageCollector = new UsageCollector();
-        }
-
         return usageCollector;
     }
 

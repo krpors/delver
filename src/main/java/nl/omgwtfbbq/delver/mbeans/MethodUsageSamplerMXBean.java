@@ -12,4 +12,6 @@ public interface MethodUsageSamplerMXBean {
     Map<String, Integer> getCallMap();
 
     void writeToFile(String file) throws MBeanException;
+
+    int getMethodCount();
 }

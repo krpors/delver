@@ -49,7 +49,7 @@ public class ClassTransformer implements ClassFileTransformer {
                 ClassPool cp = ClassPool.getDefault();
                 CtClass cc = cp.get(wut);
                 CtMethod[] methods = cc.getDeclaredMethods();
-                System.out.printf("Altering %d methods in %s\n", methods.length, wut);
+                Logger.debug("Altering %d methods in %s", methods.length, wut);
                 for (CtMethod m : methods) {
                     String modifiers = Modifier.toString(m.getModifiers());
                     String returnType = m.getReturnType().getName();
@@ -57,13 +57,13 @@ public class ClassTransformer implements ClassFileTransformer {
                             modifiers, returnType, m.getLongName());
                     m.insertBefore(w);
 
-                    System.out.printf("Inserted into method: %s\n", m.getName());
+                    Logger.debug("Inserted into method: %s", m.getName());
                 }
                 bytecode = cc.toBytecode();
                 cc.detach();
             } catch (NotFoundException e) {
-                // Silently swallow this. This may occur thanks to other generated classes,
-                // Like what Spring does with cglib.
+                Logger.error("Not found exception on class '%s': %s", className, e.getMessage());
+                e.printStackTrace();
             } catch (CannotCompileException e) {
                 e.printStackTrace();
             } catch (IOException e) {
