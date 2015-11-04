@@ -10,7 +10,7 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 
 /**
- * The classfile transformer.
+ * The class file transformer.
  */
 public class ClassTransformer implements ClassFileTransformer {
 
@@ -19,10 +19,33 @@ public class ClassTransformer implements ClassFileTransformer {
      */
     private final Config config;
 
+    /**
+     * Creates the ClassTransformer. The supplied config must not be null.
+     *
+     * @param config The Configuration.x
+     */
     public ClassTransformer(Config config) {
         this.config = config;
     }
 
+    /**
+     * Transforms the bytecode of the given class. A statement is inserted which calls the <code>UsageCollector</code>
+     * to add a signature. The inclusion and exclusion patterns from the <code>Config</code> object given in the constructor
+     * is used to determine whether the declared methods in the class are transformed or not.
+     *
+     * @param loader              The ClassLoader used to load the class. The <code>LoaderClassPath</code> is used to
+     *                            add the ClassPath of the ClassLoader. This is done to support application servers,
+     *                            which usually have a hierarchy of ClassLoaders etc.
+     * @param className           The classname which is about to be transformed (or not).
+     * @param classBeingRedefined Always false.
+     * @param protectionDomain    Unused.
+     * @param classfileBuffer     The byte code which contains the class's bytecode.
+     * @return The transformed bytecode, or the same bytecode if there was an explicit exclusion, or the class name
+     * does not match the inclusion path in the given <code>Config</code>.
+     * @throws IllegalClassFormatException
+     * @see java.lang.instrument.ClassFileTransformer
+     * @see javassist.LoaderClassPath
+     */
     public byte[] transform(ClassLoader loader, String className,
                             Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
                             byte[] classfileBuffer) throws IllegalClassFormatException {
@@ -82,11 +105,11 @@ public class ClassTransformer implements ClassFileTransformer {
                 Logger.error("NotFoundException on class '%s': %s", className, e.getMessage());
                 e.printStackTrace();
             } catch (CannotCompileException e) {
-                Logger.error("Cannot compile class '%s': %s", wut, e.getMessage());
+                Logger.error("Cannot compile class '%s': %s", className, e.getMessage());
             } catch (IOException e) {
-                e.printStackTrace();
+                Logger.error("IOException while transforming class '%s': %s", className, e.getMessage());
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Logger.error("Generic exception occurred while transforming class '%s': %s", className, ex.getMessage());
             }
         }
 

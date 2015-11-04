@@ -63,11 +63,14 @@ an inclusion matching the same regex will not have any effect.
 
 The Instrumentation agent will expose functionality through the MBeanServer of the JVM
 its running in. The object name is `nl.omgwtfbbq.delver:type=MethodUsageSampler`. Currently
-the MXBean exposes two functions:
+the MXBean exposes the following functions:
 
 1. `Map<String, Integer> getCallMap()`: containing the method signature, plus the amount of calls to that method.
 1. `void writeToFile(String file)`: Attempts to write the statistics in CSV form to the specified
-filename. Will throw an MBeanException if that failed.
+filename. Will throw an MBeanException if that failed. Currently, this will overwrite any existing file which you
+have the ownership/rights to, so **BE CAREFUL**.
+1. `int getMethodCount()`: gets the amount of methods which have been found for instrumentation (i.e. map size).
+1. `int getTotalMethodUsageCount()`: the amount of calls of every method, cumulatively.
 
 You can use `JConsole` or `VisualVM` to make a connection to an MBeanServer to view the stats.
 If you try monitoring a JVM with for example VisualVM, and the message
@@ -76,4 +79,28 @@ If you try monitoring a JVM with for example VisualVM, and the message
 
 is shown, try running the JVM with the `-Dcom.sun.management.jmxremote` parameter.
 
+The `writeToFile` function will generate a semicolon separated file which has the following format:
+
+    2;public;java.lang.String;nl.rivium.breakdown.core.jms.JMSConnection;getPassword()
+    2;public;void;nl.rivium.breakdown.core.jms.JMSConnection;setQueueConnectionFactory(java.lang.String)
+    4;public;void;nl.rivium.breakdown.ui.tab.TestSuiteTab;focusLost(org.eclipse.swt.events.FocusEvent)
+    0;public;void;nl.rivium.breakdown.core.jms.JMSConnection;removeFromParent()
+
+Columns:
+
+1. Amount of calls to this method.
+1. Modifiers (public, private, static, final, synchronized, etc)
+1. Return type.
+1. Fully qualified class name, dot separated.
+1. Method name + signature.
+
+The contents can be easily parsed using any other programs, since it's (semicolon) separated, e.g.
+
+    sort -rn file.csv | column -t -s ";"
+
+which will output something like:
+
+    468  public         void                                            nl.rivium.breakdown.ui.ProjectTree$2          handleEvent(org.eclipse.swt.widgets.Event)
+    20   public static  org.eclipse.swt.graphics.Image                  nl.rivium.breakdown.ui.ImageCache             getImage(nl.rivium.breakdown.ui.ImageCache$Icon)
+    19   public static  nl.rivium.breakdown.core.jms.DestinationType[]  nl.rivium.breakdown.core.jms.DestinationType  values()
 

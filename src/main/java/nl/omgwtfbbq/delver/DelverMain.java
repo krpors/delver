@@ -18,7 +18,7 @@ public class DelverMain {
     /**
      * Premain, entry for the Instrumentation API.
      *
-     * @param agentArgs Any agent arguments.
+     * @param agentArgs Any agent arguments. Currently this is just the path to the required configuration file.
      * @param inst      The Instrumentation.
      */
     public static void premain(String agentArgs, Instrumentation inst) {
