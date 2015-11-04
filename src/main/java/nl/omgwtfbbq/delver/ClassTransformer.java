@@ -1,6 +1,7 @@
 package nl.omgwtfbbq.delver;
 
 import javassist.*;
+import javassist.bytecode.Descriptor;
 import nl.omgwtfbbq.delver.conf.Config;
 
 import java.io.IOException;
@@ -59,7 +60,13 @@ public class ClassTransformer implements ClassFileTransformer {
                     String modifiers = Modifier.toString(m.getModifiers());
                     String returnType = m.getReturnType().getName();
 
-                    String signature = String.format("%s;%s;%s", modifiers, returnType, m.getLongName());
+                    // Make a comma separated String
+                    String signature = String.format("%s;%s;%s;%s%s",
+                            modifiers,
+                            returnType,
+                            cc.getName(),
+                            m.getName(),
+                            Descriptor.toString(m.getSignature()));
                     // add initial usage, set it to 0 so we know it's found, but zero calls.
                     UsageCollector.instance().add(signature);
 
