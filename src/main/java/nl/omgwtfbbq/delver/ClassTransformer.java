@@ -47,14 +47,24 @@ public class ClassTransformer implements ClassFileTransformer {
 
             try {
                 ClassPool cp = ClassPool.getDefault();
+                cp.childFirstLookup = true;
+                // This seems to make it work for multiple class loader cruft in WebSphere...
+                // TODO: check other app servers etc.
+                cp.insertClassPath(new LoaderClassPath(loader));
+
                 CtClass cc = cp.get(wut);
                 CtMethod[] methods = cc.getDeclaredMethods();
                 Logger.debug("Altering %d methods in %s", methods.length, wut);
                 for (CtMethod m : methods) {
                     String modifiers = Modifier.toString(m.getModifiers());
                     String returnType = m.getReturnType().getName();
-                    String w = String.format("{ nl.omgwtfbbq.delver.UsageCollector.instance().add(\"%s;%s;%s\"); }",
-                            modifiers, returnType, m.getLongName());
+
+                    String signature = String.format("%s;%s;%s", modifiers, returnType, m.getLongName());
+                    // add initial usage, set it to 0 so we know it's found, but zero calls.
+                    UsageCollector.instance().add(signature);
+
+                    String w = String.format("{ nl.omgwtfbbq.delver.UsageCollector.instance().add(\"%s\"); }",
+                            signature);
                     m.insertBefore(w);
 
                     Logger.debug("Inserted into method: %s", m.getName());
@@ -62,10 +72,10 @@ public class ClassTransformer implements ClassFileTransformer {
                 bytecode = cc.toBytecode();
                 cc.detach();
             } catch (NotFoundException e) {
-                Logger.error("Not found exception on class '%s': %s", className, e.getMessage());
+                Logger.error("NotFoundException on class '%s': %s", className, e.getMessage());
                 e.printStackTrace();
             } catch (CannotCompileException e) {
-                e.printStackTrace();
+                Logger.error("Cannot compile class '%s': %s", wut, e.getMessage());
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (Exception ex) {

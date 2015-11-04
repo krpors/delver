@@ -27,7 +27,7 @@ public final class UsageCollector {
         if (calls.containsKey(signature)) {
             calls.put(signature, calls.get(signature) + 1);
         } else {
-            calls.put(signature, 1);
+            calls.put(signature, 0);
         }
     }
 

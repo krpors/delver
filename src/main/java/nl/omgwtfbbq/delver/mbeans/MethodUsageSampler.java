@@ -49,4 +49,14 @@ public class MethodUsageSampler implements MethodUsageSamplerMXBean {
     public int getMethodCount() {
         return UsageCollector.instance().getCallMap().size();
     }
+
+    public int getTotalMethodUsageCount() {
+        Map<String, Integer> m = UsageCollector.instance().getCallMap();
+        int total = 0;
+        for (String s : m.keySet()) {
+            total += m.get(s);
+        }
+
+        return total;
+    }
 }

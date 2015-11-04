@@ -22,6 +22,12 @@ public class DelverMain {
      * @param inst      The Instrumentation.
      */
     public static void premain(String agentArgs, Instrumentation inst) {
+        if (agentArgs == null || agentArgs.isEmpty()) {
+            Logger.error("No configuration file specified. Instrumentation will not be done.");
+            Logger.error("Hint: try `java -javaagent:delver.jar=<config file location>'");
+            return;
+        }
+
         Logger.debug("Delver initializing. Using configuration file '%s'", agentArgs);
 
         FileInputStream fis = null;

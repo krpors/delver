@@ -14,4 +14,6 @@ public interface MethodUsageSamplerMXBean {
     void writeToFile(String file) throws MBeanException;
 
     int getMethodCount();
+
+    int getTotalMethodUsageCount();
 }
