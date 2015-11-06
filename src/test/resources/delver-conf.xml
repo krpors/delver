@@ -1,6 +1,7 @@
 <!-- Delver example XML config. -->
 <delver verbose="true">
     <include>
+        <pattern>nl/omgwtfbbq/delver/.*$</pattern>
         <pattern>nl/omgwtfbbq/delver/conf</pattern>
         <pattern>nl/omgwtfbbq/delver/conf/cruft/*$</pattern>
         <pattern>nl/omgwtfbbq/delver/other</pattern>

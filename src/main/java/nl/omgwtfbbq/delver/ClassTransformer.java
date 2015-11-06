@@ -9,6 +9,14 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 
+/*
+TODO: abstract methods/classes aren't done quite correctly.
+See http://stackoverflow.com/questions/3291637/alternatives-to-java-lang-reflect-proxy-for-creating-proxies-of-abstract-classes
+for some more information.
+
+TODO: constructors?
+ */
+
 /**
  * The class file transformer.
  */
