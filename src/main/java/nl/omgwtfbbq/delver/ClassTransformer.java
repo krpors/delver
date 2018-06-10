@@ -86,7 +86,7 @@ public class ClassTransformer implements ClassFileTransformer {
 
                 CtClass cc = cp.get(wut);
                 CtMethod[] methods = cc.getDeclaredMethods();
-                Logger.debug("Altering %d methods in %s", methods.length, wut);
+                Logger.debug("  Altering %d methods in %s", methods.length, wut);
                 for (CtMethod m : methods) {
                     String modifiers = Modifier.toString(m.getModifiers());
                     String returnType = m.getReturnType().getName();
@@ -101,11 +101,19 @@ public class ClassTransformer implements ClassFileTransformer {
                     // add initial usage, set it to 0 so we know it's found, but zero calls.
                     UsageCollector.instance().add(signature);
 
+                    Logger.debug("    Attempting to insert into: %s", m.getLongName());
+
                     String w = String.format("{ nl.omgwtfbbq.delver.UsageCollector.instance().add(\"%s\"); }",
                             signature);
+
+                    if (Modifier.isAbstract(m.getModifiers())) {
+                        Logger.debug("    Method is abstract, skipping %s", m.getLongName());
+                        continue;
+                    }
+
                     m.insertBefore(w);
 
-                    Logger.debug("Inserted into method: %s", m.getName());
+                    Logger.debug("    Inserted into method: %s", m.getName());
                 }
                 bytecode = cc.toBytecode();
                 cc.detach();
@@ -114,6 +122,7 @@ public class ClassTransformer implements ClassFileTransformer {
                 e.printStackTrace();
             } catch (CannotCompileException e) {
                 Logger.error("Cannot compile class '%s': %s", className, e.getMessage());
+                e.printStackTrace(System.out);
             } catch (IOException e) {
                 Logger.error("IOException while transforming class '%s': %s", className, e.getMessage());
             } catch (Exception ex) {
