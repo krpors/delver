@@ -4,7 +4,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -13,6 +17,9 @@ import java.util.List;
 @XmlRootElement(name = "delver")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Config {
+
+    @XmlElement(name = "http")
+    private HttpConfig httpConfig;
 
     @XmlElementWrapper(name = "include")
     @XmlElement(name = "pattern")
@@ -69,6 +76,14 @@ public class Config {
         return listExcludes;
     }
 
+    public HttpConfig getHttpConfig() {
+        return httpConfig;
+    }
+
+    public void setHttpConfig(HttpConfig config) {
+        this.httpConfig = config;
+    }
+
     public void setExcludes(List<Pattern> listExcludes) {
         this.listExcludes = listExcludes;
     }
@@ -95,5 +110,34 @@ public class Config {
         }
 
         return false;
+    }
+
+    /**
+     * Http server configuration.
+     */
+    @XmlAccessorType(XmlAccessType.FIELD)
+    public static class HttpConfig {
+
+        @XmlElement(name = "enabled")
+        private boolean httpEnabled;
+
+        @XmlElement(name = "port")
+        private int httpPort;
+
+        public boolean isHttpEnabled() {
+            return httpEnabled;
+        }
+
+        public void setHttpEnabled(boolean httpEnabled) {
+            this.httpEnabled = httpEnabled;
+        }
+
+        public int getHttpPort() {
+            return httpPort;
+        }
+
+        public void setHttpPort(int httpPort) {
+            this.httpPort = httpPort;
+        }
     }
 }

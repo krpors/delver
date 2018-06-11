@@ -1,5 +1,8 @@
 package nl.omgwtfbbq.delver;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +34,6 @@ public final class UsageCollector {
         return usageCollector;
     }
 
-
     /**
      * Adds a signature, or ups the counter by one for that signature.
      *
@@ -52,5 +54,33 @@ public final class UsageCollector {
      */
     public Map<String, Integer> getCallMap() {
         return Collections.unmodifiableMap(calls);
+    }
+
+    /**
+     * Writes the contents of the map to the specified outputstream.
+     *
+     * @param os The outputstream to write to.
+     * @throws IOException When something fails.
+     */
+    public void write(final OutputStream os) throws IOException {
+        for (String signature : calls.keySet()) {
+            int callCount = calls.get(signature);
+            os.write((callCount + ";" + signature + "\n").getBytes());
+        }
+        os.flush();
+    }
+
+    /**
+     * Writes the contents of the map to the specified writer.
+     *
+     * @param w The writer to write to.
+     * @throws IOException When something fails.
+     */
+    public void write(final Writer w) throws IOException {
+        for (String signature : calls.keySet()) {
+            int callCount = calls.get(signature);
+            w.write(callCount + ";" + signature + "\n");
+        }
+        w.flush();
     }
 }

@@ -1,5 +1,9 @@
-<!-- Delver example XML config. -->
+<!--setConfig Delver example XML config. -->
 <delver verbose="true">
+    <http>
+        <enabled>true</enabled>
+        <port>8081</port>
+    </http>
     <include>
         <pattern>nl/omgwtfbbq/delver/.*$</pattern>
         <pattern>nl/omgwtfbbq/delver/conf</pattern>

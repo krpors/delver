@@ -99,6 +99,7 @@ public class ClassTransformer implements ClassFileTransformer {
                             m.getName(),
                             Descriptor.toString(m.getSignature()));
                     // add initial usage, set it to 0 so we know it's found, but zero calls.
+
                     UsageCollector.instance().add(signature);
 
                     Logger.debug("    Attempting to insert into: %s", m.getLongName());

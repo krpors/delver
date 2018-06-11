@@ -13,6 +13,9 @@ public class ConfigTest {
         InputStream is = Config.class.getResourceAsStream("/delver-conf.xml");
         Config d = Config.read(is);
 
+        Assert.assertEquals(true, d.getHttpConfig().isHttpEnabled());
+        Assert.assertEquals(8081, d.getHttpConfig().getHttpPort());
+
         // 4 in includes, 3 ok, 1 wrong.
         Assert.assertEquals(6, d.getIncludes().size());
 

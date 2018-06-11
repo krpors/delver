@@ -24,10 +24,7 @@ public class MethodUsageSampler implements MethodUsageSamplerMXBean {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
-
-            for (String c : calls.keySet()) {
-                fos.write(String.format("%d;%s\n", calls.get(c), c).getBytes());
-            }
+            UsageCollector.instance().write(fos);
             Logger.debug("Written %d entries to file '%s'", calls.size(), file);
         } catch (IOException ex) {
             String msg = String.format("Unable to write to file '%s': %s", file, ex.getMessage());

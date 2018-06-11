@@ -1,6 +1,8 @@
 package nl.omgwtfbbq.delver;
 
+import com.sun.net.httpserver.HttpServer;
 import nl.omgwtfbbq.delver.conf.Config;
+import nl.omgwtfbbq.delver.http.DelverHttpHandler;
 import nl.omgwtfbbq.delver.mbeans.MethodUsageSampler;
 
 import javax.management.JMException;
@@ -12,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
 
 
 public class DelverMain {
@@ -39,10 +42,21 @@ public class DelverMain {
             Logger.debug("Configuration file read successfully");
             ClassTransformer classTransformer = new ClassTransformer(config);
             inst.addTransformer(classTransformer);
+
+            // Start HTTP server if chosen to do so. We use the JDK internal HTTP server.
+            if (config.getHttpConfig().isHttpEnabled()) {
+                Logger.debug("Starting HTTP server on port %s...", config.getHttpConfig().getHttpPort());
+                HttpServer server = HttpServer.create(new InetSocketAddress(config.getHttpConfig().getHttpPort()), 0);
+                server.createContext("/", new DelverHttpHandler());
+                server.setExecutor(null); // creates a default executor
+                server.start();
+            }
         } catch (JAXBException e) {
             Logger.error("Configuration file '%s' found, but unable to read: %s", agentArgs, e.getMessage());
         } catch (FileNotFoundException e) {
             Logger.error("Unable to open configuration file '%s', disabling instrumentation.", agentArgs);
+        } catch (IOException e) {
+            Logger.error("Unable to start HTTP server: %s", e.getMessage());
         } finally {
             if (fis != null) {
                 try {
