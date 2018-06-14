@@ -1,5 +1,8 @@
 package nl.omgwtfbbq.delver;
 
+/**
+ * Performance metric class.
+ */
 public class Metric {
     private int callCount = 0;
 

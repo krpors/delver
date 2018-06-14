@@ -1,7 +1,5 @@
 package nl.omgwtfbbq.delver;
 
-import javassist.bytecode.Descriptor;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -14,12 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Singleton instance to collect usages of methods.
  */
-public final class UsageCollector {
+public final class PerformanceCollector {
 
     /**
      * Only instance.
      */
-    private static UsageCollector usageCollector = new UsageCollector();
+    private static PerformanceCollector performanceCollector = new PerformanceCollector();
 
     /**
      * The map with a key of signature, plus the amount of calls. The map is made
@@ -29,11 +27,11 @@ public final class UsageCollector {
      */
     private Map<String, Metric> calls = new ConcurrentHashMap<>();
 
-    private UsageCollector() {
+    private PerformanceCollector() {
     }
 
-    public static UsageCollector instance() {
-        return usageCollector;
+    public static PerformanceCollector instance() {
+        return performanceCollector;
     }
 
     /**

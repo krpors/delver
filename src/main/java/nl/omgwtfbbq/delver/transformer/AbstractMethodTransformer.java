@@ -1,4 +1,4 @@
-package nl.omgwtfbbq.delver;
+package nl.omgwtfbbq.delver.transformer;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -7,6 +7,7 @@ import javassist.CtMethod;
 import javassist.LoaderClassPath;
 import javassist.NotFoundException;
 import javassist.bytecode.Descriptor;
+import nl.omgwtfbbq.delver.Logger;
 import nl.omgwtfbbq.delver.conf.Config;
 
 import java.io.IOException;
@@ -18,12 +19,13 @@ import java.security.ProtectionDomain;
 TODO: abstract methods/classes aren't done quite correctly.
 See http://stackoverflow.com/questions/3291637/alternatives-to-java-lang-reflect-proxy-for-creating-proxies-of-abstract-classes
 for some more information.
-
 TODO: constructors?
  */
 
 /**
- * The class file transformer.
+ * This is the basic method transformer. One must override {@link #transform(CtClass, CtMethod)} with logic.
+ *
+ * @see UsageTransformer
  */
 public abstract class AbstractMethodTransformer implements ClassFileTransformer {
 
@@ -42,7 +44,7 @@ public abstract class AbstractMethodTransformer implements ClassFileTransformer 
     }
 
     /**
-     * Transforms the bytecode of the given class. A statement is inserted which calls the <code>UsageCollector</code>
+     * Transforms the bytecode of the given class. A statement is inserted which calls the <code>PerformanceCollector</code>
      * to add a signature. The inclusion and exclusion patterns from the <code>Config</code> object given in the constructor
      * is used to determine whether the declared methods in the class are transformed or not.
      *

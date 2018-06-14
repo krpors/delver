@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import nl.omgwtfbbq.delver.conf.Config;
 import nl.omgwtfbbq.delver.http.DelverHttpHandler;
 import nl.omgwtfbbq.delver.mbeans.MethodUsageSampler;
+import nl.omgwtfbbq.delver.transformer.UsageTransformer;
 
 import javax.management.JMException;
 import javax.management.MBeanServer;
@@ -51,8 +52,13 @@ public class DelverMain {
                 server = HttpServer.create(new InetSocketAddress(config.getHttpConfig().getHttpPort()), 0);
                 server.createContext("/", new DelverHttpHandler());
                 server.createContext("/stop", httpExchange -> {
-                    Logger.warn("Stopping webserver...");
-                    httpExchange.sendResponseHeaders(200, 0);
+                    // FIXME: on JVM exit, the http server is not automatically stopped.
+                    // I tried a shutdown hook but that does not seem to be invoked? For
+                    // now, call /stop to just stop the webserver.
+                    String msg = "Stopping webserver in 5 seconds ...";
+                    Logger.warn(msg);
+                    httpExchange.sendResponseHeaders(200, (msg + "\n").length());
+                    httpExchange.getResponseBody().write((msg + "\n").getBytes());
                     httpExchange.getResponseBody().close();
                     server.stop(5);
                     Logger.warn("Webserver stopped!");

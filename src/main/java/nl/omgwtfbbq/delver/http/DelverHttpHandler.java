@@ -2,7 +2,7 @@ package nl.omgwtfbbq.delver.http;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import nl.omgwtfbbq.delver.UsageCollector;
+import nl.omgwtfbbq.delver.PerformanceCollector;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,7 +16,7 @@ public class DelverHttpHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange h) throws IOException {
         StringWriter w = new StringWriter();
-        UsageCollector.instance().write(w);
+        PerformanceCollector.instance().write(w);
         String response = w.toString();
         h.sendResponseHeaders(200, response.length());
         h.getResponseHeaders().add("Content-Type", "text/plain");

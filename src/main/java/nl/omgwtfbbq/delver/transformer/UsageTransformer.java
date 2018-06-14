@@ -1,7 +1,9 @@
-package nl.omgwtfbbq.delver;
+package nl.omgwtfbbq.delver.transformer;
 
 import javassist.*;
 import javassist.bytecode.Descriptor;
+import nl.omgwtfbbq.delver.Logger;
+import nl.omgwtfbbq.delver.PerformanceCollector;
 import nl.omgwtfbbq.delver.conf.Config;
 
 /*
@@ -36,12 +38,12 @@ public class UsageTransformer extends AbstractMethodTransformer {
                 Descriptor.toString(m.getSignature()));
         // add initial usage, set it to 0 so we know it's found, but zero calls.
 
-        UsageCollector.instance().add(signature);
+        PerformanceCollector.instance().add(signature);
 
         Logger.debug("    Attempting to insert into: %s", m.getLongName());
 
 
-        String w = String.format("{ nl.omgwtfbbq.delver.UsageCollector.instance().add(\"%s\", delver_pkg_start, System.currentTimeMillis()); }",
+        String w = String.format("{ nl.omgwtfbbq.delver.PerformanceCollector.instance().add(\"%s\", delver_pkg_start, System.currentTimeMillis()); }",
                 signature);
 
         if (Modifier.isAbstract(m.getModifiers())) {

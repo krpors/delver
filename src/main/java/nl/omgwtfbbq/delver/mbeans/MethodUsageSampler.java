@@ -2,7 +2,7 @@ package nl.omgwtfbbq.delver.mbeans;
 
 import nl.omgwtfbbq.delver.Logger;
 import nl.omgwtfbbq.delver.Metric;
-import nl.omgwtfbbq.delver.UsageCollector;
+import nl.omgwtfbbq.delver.PerformanceCollector;
 
 import javax.management.MBeanException;
 import javax.management.MXBean;
@@ -17,15 +17,15 @@ import java.util.Map;
 public class MethodUsageSampler implements MethodUsageSamplerMXBean {
 
     public Map<String, Metric> getCallMap() {
-        return UsageCollector.instance().getCallMap();
+        return PerformanceCollector.instance().getCallMap();
     }
 
     public void writeToFile(String file) throws MBeanException {
-        Map<String, Metric> calls = UsageCollector.instance().getCallMap();
+        Map<String, Metric> calls = PerformanceCollector.instance().getCallMap();
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
-            UsageCollector.instance().write(fos);
+            PerformanceCollector.instance().write(fos);
             Logger.debug("Written %d entries to file '%s'", calls.size(), file);
         } catch (IOException ex) {
             String msg = String.format("Unable to write to file '%s': %s", file, ex.getMessage());
@@ -45,11 +45,11 @@ public class MethodUsageSampler implements MethodUsageSamplerMXBean {
     }
 
     public int getMethodCount() {
-        return UsageCollector.instance().getCallMap().size();
+        return PerformanceCollector.instance().getCallMap().size();
     }
 
     public int getTotalMethodUsageCount() {
-        Map<String, Metric> m = UsageCollector.instance().getCallMap();
+        Map<String, Metric> m = PerformanceCollector.instance().getCallMap();
         int total = 0;
         for (String s : m.keySet()) {
             total += m.get(s).getCallCount();
