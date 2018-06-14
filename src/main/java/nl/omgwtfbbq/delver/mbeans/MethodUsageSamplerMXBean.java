@@ -1,7 +1,8 @@
 package nl.omgwtfbbq.delver.mbeans;
 
+import nl.omgwtfbbq.delver.Metric;
+
 import javax.management.MBeanException;
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Map;
  */
 public interface MethodUsageSamplerMXBean {
 
-    Map<String, Integer> getCallMap();
+    Map<String, Metric> getCallMap();
 
     void writeToFile(String file) throws MBeanException;
 

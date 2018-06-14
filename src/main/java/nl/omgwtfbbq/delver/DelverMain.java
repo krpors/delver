@@ -19,6 +19,8 @@ import java.net.InetSocketAddress;
 
 public class DelverMain {
 
+    private static HttpServer server;
+
     /**
      * Premain, entry for the Instrumentation API.
      *
@@ -40,14 +42,21 @@ public class DelverMain {
             Config config = Config.read(fis);
 
             Logger.debug("Configuration file read successfully");
-            ClassTransformer classTransformer = new ClassTransformer(config);
-            inst.addTransformer(classTransformer);
+            UsageTransformer usageTransformer = new UsageTransformer(config);
+            inst.addTransformer(usageTransformer);
 
             // Start HTTP server if chosen to do so. We use the JDK internal HTTP server.
             if (config.getHttpConfig().isHttpEnabled()) {
                 Logger.debug("Starting HTTP server on port %s...", config.getHttpConfig().getHttpPort());
-                HttpServer server = HttpServer.create(new InetSocketAddress(config.getHttpConfig().getHttpPort()), 0);
+                server = HttpServer.create(new InetSocketAddress(config.getHttpConfig().getHttpPort()), 0);
                 server.createContext("/", new DelverHttpHandler());
+                server.createContext("/stop", httpExchange -> {
+                    Logger.warn("Stopping webserver...");
+                    httpExchange.sendResponseHeaders(200, 0);
+                    httpExchange.getResponseBody().close();
+                    server.stop(5);
+                    Logger.warn("Webserver stopped!");
+                });
                 server.setExecutor(null); // creates a default executor
                 server.start();
             }

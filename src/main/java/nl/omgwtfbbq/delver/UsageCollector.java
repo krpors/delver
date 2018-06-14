@@ -1,5 +1,7 @@
 package nl.omgwtfbbq.delver;
 
+import javassist.bytecode.Descriptor;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -25,7 +27,7 @@ public final class UsageCollector {
      * method is inserted in all transformed classes, therefore the add() can be
      * called from any number of threads.
      */
-    private Map<String, Integer> calls = new ConcurrentHashMap<String, Integer>();
+    private Map<String, Metric> calls = new ConcurrentHashMap<>();
 
     private UsageCollector() {
     }
@@ -41,9 +43,26 @@ public final class UsageCollector {
      */
     public void add(String signature) {
         if (calls.containsKey(signature)) {
-            calls.put(signature, calls.get(signature) + 1);
+            Metric m = calls.get(signature);
+            m.update();
+            calls.put(signature, m);
         } else {
-            calls.put(signature, 0);
+            calls.put(signature, new Metric());
+        }
+    }
+
+    /**
+     * Adds a signature, or ups the counter by one for that signature.
+     *
+     * @param signature The signature to add.
+     */
+    public void add(String signature, long start, long end) {
+        if (calls.containsKey(signature)) {
+            Metric m = calls.get(signature);
+            m.update(start, end);
+            calls.put(signature, m);
+        } else {
+            calls.put(signature, new Metric());
         }
     }
 
@@ -52,7 +71,7 @@ public final class UsageCollector {
      *
      * @return The map.
      */
-    public Map<String, Integer> getCallMap() {
+    public Map<String, Metric> getCallMap() {
         return Collections.unmodifiableMap(calls);
     }
 
@@ -64,8 +83,10 @@ public final class UsageCollector {
      */
     public void write(final OutputStream os) throws IOException {
         for (String signature : calls.keySet()) {
-            int callCount = calls.get(signature);
-            os.write((callCount + ";" + signature + "\n").getBytes());
+            Metric m = calls.get(signature);
+            os.write((m.getCallCount() + ";").getBytes());
+            os.write((m.getAverage() + ";").getBytes());
+            os.write((signature + "\n").getBytes());
         }
         os.flush();
     }
@@ -77,9 +98,19 @@ public final class UsageCollector {
      * @throws IOException When something fails.
      */
     public void write(final Writer w) throws IOException {
+        w.write("Call count;Max (ms);Average (ms);Total (ms);Modifiers;Returntype;Classname;Methodname\n");
         for (String signature : calls.keySet()) {
-            int callCount = calls.get(signature);
-            w.write(callCount + ";" + signature + "\n");
+            Metric m = calls.get(signature);
+            w.write(String.valueOf(m.getCallCount()));
+            w.write(";");
+            w.write(String.valueOf(m.getMax()));
+            w.write(";");
+            w.write(String.valueOf(m.getAverage()));
+            w.write(";");
+            w.write(String.valueOf(m.getTotal()));
+            w.write(";");
+            w.write(signature);
+            w.write("\n");
         }
         w.flush();
     }

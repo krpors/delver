@@ -23,6 +23,5 @@ public class DelverHttpHandler implements HttpHandler {
         OutputStream os = h.getResponseBody();
         os.write(response.getBytes());
         os.close();
-
     }
 }

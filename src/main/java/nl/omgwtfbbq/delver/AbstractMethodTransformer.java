@@ -1,6 +1,11 @@
 package nl.omgwtfbbq.delver;
 
-import javassist.*;
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
+import javassist.LoaderClassPath;
+import javassist.NotFoundException;
 import javassist.bytecode.Descriptor;
 import nl.omgwtfbbq.delver.conf.Config;
 
@@ -20,7 +25,7 @@ TODO: constructors?
 /**
  * The class file transformer.
  */
-public class ClassTransformer implements ClassFileTransformer {
+public abstract class AbstractMethodTransformer implements ClassFileTransformer {
 
     /**
      * The loaded configuration. Must not be null.
@@ -28,11 +33,11 @@ public class ClassTransformer implements ClassFileTransformer {
     private final Config config;
 
     /**
-     * Creates the ClassTransformer. The supplied config must not be null.
+     * Creates the UsageTransformer. The supplied config must not be null.
      *
      * @param config The Configuration.x
      */
-    public ClassTransformer(Config config) {
+    public AbstractMethodTransformer(Config config) {
         this.config = config;
     }
 
@@ -51,8 +56,8 @@ public class ClassTransformer implements ClassFileTransformer {
      * @return The transformed bytecode, or the same bytecode if there was an explicit exclusion, or the class name
      * does not match the inclusion path in the given <code>Config</code>.
      * @throws IllegalClassFormatException
-     * @see java.lang.instrument.ClassFileTransformer
-     * @see javassist.LoaderClassPath
+     * @see ClassFileTransformer
+     * @see LoaderClassPath
      */
     public byte[] transform(ClassLoader loader, String className,
                             Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
@@ -75,7 +80,7 @@ public class ClassTransformer implements ClassFileTransformer {
         if (config.isIncluded(className)) {
             Logger.debug("Included class '%s'", className);
 
-            String wut = className.replace("/", ".");
+            String wut = Descriptor.toJavaName(className);
 
             try {
                 ClassPool cp = ClassPool.getDefault();
@@ -85,36 +90,12 @@ public class ClassTransformer implements ClassFileTransformer {
                 cp.insertClassPath(new LoaderClassPath(loader));
 
                 CtClass cc = cp.get(wut);
+                Logger.debug("Checking class %s", wut);
+
                 CtMethod[] methods = cc.getDeclaredMethods();
                 Logger.debug("  Altering %d methods in %s", methods.length, wut);
                 for (CtMethod m : methods) {
-                    String modifiers = Modifier.toString(m.getModifiers());
-                    String returnType = m.getReturnType().getName();
-
-                    // Make a comma separated String
-                    String signature = String.format("%s;%s;%s;%s%s",
-                            modifiers,
-                            returnType,
-                            cc.getName(),
-                            m.getName(),
-                            Descriptor.toString(m.getSignature()));
-                    // add initial usage, set it to 0 so we know it's found, but zero calls.
-
-                    UsageCollector.instance().add(signature);
-
-                    Logger.debug("    Attempting to insert into: %s", m.getLongName());
-
-                    String w = String.format("{ nl.omgwtfbbq.delver.UsageCollector.instance().add(\"%s\"); }",
-                            signature);
-
-                    if (Modifier.isAbstract(m.getModifiers())) {
-                        Logger.debug("    Method is abstract, skipping %s", m.getLongName());
-                        continue;
-                    }
-
-                    m.insertBefore(w);
-
-                    Logger.debug("    Inserted into method: %s", m.getName());
+                    transform(cc, m);
                 }
                 bytecode = cc.toBytecode();
                 cc.detach();
@@ -128,10 +109,12 @@ public class ClassTransformer implements ClassFileTransformer {
                 Logger.error("IOException while transforming class '%s': %s", className, e.getMessage());
             } catch (Exception ex) {
                 Logger.error("Generic exception occurred while transforming class '%s': %s", className, ex.getMessage());
+                ex.printStackTrace(System.out);
             }
         }
 
         return bytecode;
     }
 
+    public abstract void transform(CtClass cc, CtMethod m) throws NotFoundException, CannotCompileException;
 }
