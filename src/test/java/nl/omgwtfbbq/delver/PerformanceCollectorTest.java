@@ -9,10 +9,10 @@ public class PerformanceCollectorTest {
     @Test
     public void test() throws IOException {
         PerformanceCollector c = PerformanceCollector.instance();
-        c.add("public static void thing");
-        c.add("public static void asd");
-        c.add("public static void asd");
-        c.add("public static void asd");
+        c.add(new Signature("public", "void", "Object", "toString", "()"));
+        c.add(new Signature("public", "void", "Object", "toString", "()"));
+        c.add(new Signature("public", "void", "Object", "toString", "()"));
+        c.add(new Signature("public", "void", "Object", "toString", "()"));
 
         c.write(System.out);
     }

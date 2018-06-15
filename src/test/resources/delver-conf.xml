@@ -13,6 +13,7 @@
         <pattern>org.example.*.anything.*</pattern>
     </include>
     <exclude>
+        <pattern>nl/omgwtfbbq/delver/SignatureFormatter</pattern>
         <pattern>nl/skipthis</pattern>
         <pattern>nl/andthis/skip/too</pattern>
     </exclude>

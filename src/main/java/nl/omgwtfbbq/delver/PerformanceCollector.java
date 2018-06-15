@@ -25,7 +25,7 @@ public final class PerformanceCollector {
      * method is inserted in all transformed classes, therefore the add() can be
      * called from any number of threads.
      */
-    private Map<String, Metric> calls = new ConcurrentHashMap<>();
+    private Map<Signature, Metric> calls = new ConcurrentHashMap<>();
 
     private PerformanceCollector() {
     }
@@ -39,7 +39,7 @@ public final class PerformanceCollector {
      *
      * @param signature The signature to add.
      */
-    public void add(String signature) {
+    public void add(final Signature signature) {
         if (calls.containsKey(signature)) {
             Metric m = calls.get(signature);
             m.update();
@@ -54,7 +54,7 @@ public final class PerformanceCollector {
      *
      * @param signature The signature to add.
      */
-    public void add(String signature, long start, long end) {
+    public void add(final Signature signature, long start, long end) {
         if (calls.containsKey(signature)) {
             Metric m = calls.get(signature);
             m.update(start, end);
@@ -69,8 +69,17 @@ public final class PerformanceCollector {
      *
      * @return The map.
      */
-    public Map<String, Metric> getCallMap() {
+    public Map<Signature, Metric> getCallMap() {
         return Collections.unmodifiableMap(calls);
+    }
+
+    /**
+     * Gets the total amount of calls.
+     *
+     * @return The tiotal amount of calls.
+     */
+    public long totalCallCount() {
+        return calls.values().stream().mapToInt(Metric::getCallCount).sum();
     }
 
     /**
@@ -80,11 +89,11 @@ public final class PerformanceCollector {
      * @throws IOException When something fails.
      */
     public void write(final OutputStream os) throws IOException {
-        for (String signature : calls.keySet()) {
+        for (Signature signature : calls.keySet()) {
             Metric m = calls.get(signature);
             os.write((m.getCallCount() + ";").getBytes());
             os.write((m.getAverage() + ";").getBytes());
-            os.write((signature + "\n").getBytes());
+            os.write(SignatureFormatter.format(signature).getBytes());
         }
         os.flush();
     }
@@ -97,7 +106,7 @@ public final class PerformanceCollector {
      */
     public void write(final Writer w) throws IOException {
         w.write("Call count;Max (ms);Average (ms);Total (ms);Modifiers;Returntype;Classname;Methodname\n");
-        for (String signature : calls.keySet()) {
+        for (Signature signature : calls.keySet()) {
             Metric m = calls.get(signature);
             w.write(String.valueOf(m.getCallCount()));
             w.write(";");
@@ -107,9 +116,11 @@ public final class PerformanceCollector {
             w.write(";");
             w.write(String.valueOf(m.getTotal()));
             w.write(";");
-            w.write(signature);
+            w.write(SignatureFormatter.format(signature));
             w.write("\n");
         }
+        int sum = calls.values().stream().mapToInt(Metric::getCallCount).sum();
+        System.out.println("sum of all calls: " + sum);
         w.flush();
     }
 }

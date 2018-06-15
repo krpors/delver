@@ -4,6 +4,7 @@ import javassist.*;
 import javassist.bytecode.Descriptor;
 import nl.omgwtfbbq.delver.Logger;
 import nl.omgwtfbbq.delver.PerformanceCollector;
+import nl.omgwtfbbq.delver.Signature;
 import nl.omgwtfbbq.delver.conf.Config;
 
 /*
@@ -17,9 +18,9 @@ TODO: constructors?
 /**
  * The class file transformer.
  */
-public class UsageTransformer extends AbstractMethodTransformer {
+public class PerformanceTransformer extends AbstractMethodTransformer {
 
-    public UsageTransformer(final Config config) {
+    public PerformanceTransformer(final Config config) {
         super(config);
     }
 
@@ -38,13 +39,26 @@ public class UsageTransformer extends AbstractMethodTransformer {
                 Descriptor.toString(m.getSignature()));
         // add initial usage, set it to 0 so we know it's found, but zero calls.
 
-        PerformanceCollector.instance().add(signature);
+        Signature s = new Signature();
+        s.setModifiers(modifiers);
+        s.setReturnType(returnType);
+        s.setClassName(cc.getName());
+        s.setMethod(m.getName());
+        s.setSignature(Descriptor.toString(m.getSignature()));
+        PerformanceCollector.instance().add(s);
 
         Logger.debug("    Attempting to insert into: %s", m.getLongName());
 
 
-        String w = String.format("{ nl.omgwtfbbq.delver.PerformanceCollector.instance().add(\"%s\", delver_pkg_start, System.currentTimeMillis()); }",
-                signature);
+        String code = "{";
+        code += "nl.omgwtfbbq.delver.Signature s = new nl.omgwtfbbq.delver.Signature();";
+        code += String.format("s.setModifiers(\"%s\");", modifiers);
+        code += String.format("s.setReturnType(\"%s\");", returnType);
+        code += String.format("s.setClassName(\"%s\");", cc.getName());
+        code += String.format("s.setMethod(\"%s\");", m.getName());
+        code += String.format("s.setSignature(\"%s\");", Descriptor.toString(m.getSignature()));
+        code += String.format("nl.omgwtfbbq.delver.PerformanceCollector.instance().add(s, delver_pkg_start, System.currentTimeMillis());");
+        code += "}";
 
         if (Modifier.isAbstract(m.getModifiers())) {
             Logger.debug("    Method is abstract, skipping %s", m.getLongName());
@@ -53,7 +67,7 @@ public class UsageTransformer extends AbstractMethodTransformer {
 
         m.addLocalVariable("delver_pkg_start", CtClass.longType);
         m.insertBefore("{ delver_pkg_start = System.currentTimeMillis(); } ");
-        m.insertAfter(w);
+        m.insertAfter(code);
 
         Logger.debug("    Inserted into method: %s", m.getName());
     }

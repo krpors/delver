@@ -3,8 +3,9 @@ package nl.omgwtfbbq.delver;
 import com.sun.net.httpserver.HttpServer;
 import nl.omgwtfbbq.delver.conf.Config;
 import nl.omgwtfbbq.delver.http.DelverHttpHandler;
+import nl.omgwtfbbq.delver.http.TotalsHttpHandler;
 import nl.omgwtfbbq.delver.mbeans.MethodUsageSampler;
-import nl.omgwtfbbq.delver.transformer.UsageTransformer;
+import nl.omgwtfbbq.delver.transformer.PerformanceTransformer;
 
 import javax.management.JMException;
 import javax.management.MBeanServer;
@@ -43,14 +44,15 @@ public class DelverMain {
             Config config = Config.read(fis);
 
             Logger.debug("Configuration file read successfully");
-            UsageTransformer usageTransformer = new UsageTransformer(config);
-            inst.addTransformer(usageTransformer);
+            PerformanceTransformer performanceTransformer = new PerformanceTransformer(config);
+            inst.addTransformer(performanceTransformer);
 
             // Start HTTP server if chosen to do so. We use the JDK internal HTTP server.
             if (config.getHttpConfig().isHttpEnabled()) {
                 Logger.debug("Starting HTTP server on port %s...", config.getHttpConfig().getHttpPort());
                 server = HttpServer.create(new InetSocketAddress(config.getHttpConfig().getHttpPort()), 0);
                 server.createContext("/", new DelverHttpHandler());
+                server.createContext("/totals", new TotalsHttpHandler());
                 server.createContext("/stop", httpExchange -> {
                     // FIXME: on JVM exit, the http server is not automatically stopped.
                     // I tried a shutdown hook but that does not seem to be invoked? For

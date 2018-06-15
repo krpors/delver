@@ -20,7 +20,7 @@ public class ConfigTest {
         Assert.assertEquals(6, d.getIncludes().size());
 
         // 2 in excludes.
-        Assert.assertEquals(2, d.getExcludes().size());
+        Assert.assertEquals(3, d.getExcludes().size());
 
         Assert.assertTrue(d.getIncludes().get(0).isValid());
         Assert.assertTrue(d.getIncludes().get(1).isValid());

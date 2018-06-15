@@ -3,6 +3,7 @@ package nl.omgwtfbbq.delver.mbeans;
 import nl.omgwtfbbq.delver.Logger;
 import nl.omgwtfbbq.delver.Metric;
 import nl.omgwtfbbq.delver.PerformanceCollector;
+import nl.omgwtfbbq.delver.Signature;
 
 import javax.management.MBeanException;
 import javax.management.MXBean;
@@ -16,12 +17,12 @@ import java.util.Map;
 @MXBean
 public class MethodUsageSampler implements MethodUsageSamplerMXBean {
 
-    public Map<String, Metric> getCallMap() {
+    public Map<Signature, Metric> getCallMap() {
         return PerformanceCollector.instance().getCallMap();
     }
 
     public void writeToFile(String file) throws MBeanException {
-        Map<String, Metric> calls = PerformanceCollector.instance().getCallMap();
+        Map<Signature, Metric> calls = PerformanceCollector.instance().getCallMap();
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
@@ -49,9 +50,9 @@ public class MethodUsageSampler implements MethodUsageSamplerMXBean {
     }
 
     public int getTotalMethodUsageCount() {
-        Map<String, Metric> m = PerformanceCollector.instance().getCallMap();
+        Map<Signature, Metric> m = PerformanceCollector.instance().getCallMap();
         int total = 0;
-        for (String s : m.keySet()) {
+        for (Signature s : m.keySet()) {
             total += m.get(s).getCallCount();
         }
 

@@ -25,7 +25,7 @@ TODO: constructors?
 /**
  * This is the basic method transformer. One must override {@link #transform(CtClass, CtMethod)} with logic.
  *
- * @see UsageTransformer
+ * @see PerformanceTransformer
  */
 public abstract class AbstractMethodTransformer implements ClassFileTransformer {
 
@@ -35,7 +35,7 @@ public abstract class AbstractMethodTransformer implements ClassFileTransformer 
     private final Config config;
 
     /**
-     * Creates the UsageTransformer. The supplied config must not be null.
+     * Creates the PerformanceTransformer. The supplied config must not be null.
      *
      * @param config The Configuration.x
      */
