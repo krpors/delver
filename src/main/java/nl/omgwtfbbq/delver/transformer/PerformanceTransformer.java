@@ -37,18 +37,8 @@ public class PerformanceTransformer extends AbstractMethodTransformer {
                 cc.getName(),
                 m.getName(),
                 Descriptor.toString(m.getSignature()));
-        // add initial usage, set it to 0 so we know it's found, but zero calls.
-
-        Signature s = new Signature();
-        s.setModifiers(modifiers);
-        s.setReturnType(returnType);
-        s.setClassName(cc.getName());
-        s.setMethod(m.getName());
-        s.setSignature(Descriptor.toString(m.getSignature()));
-        PerformanceCollector.instance().add(s);
 
         Logger.debug("    Attempting to insert into: %s", m.getLongName());
-
 
         String code = "{";
         code += "nl.omgwtfbbq.delver.Signature s = new nl.omgwtfbbq.delver.Signature();";
@@ -68,6 +58,15 @@ public class PerformanceTransformer extends AbstractMethodTransformer {
         m.addLocalVariable("delver_pkg_start", CtClass.longType);
         m.insertBefore("{ delver_pkg_start = System.currentTimeMillis(); } ");
         m.insertAfter(code);
+
+        // add initial usage, set it to 0 so we know it's found, but zero calls.
+        Signature s = new Signature();
+        s.setModifiers(modifiers);
+        s.setReturnType(returnType);
+        s.setClassName(cc.getName());
+        s.setMethod(m.getName());
+        s.setSignature(Descriptor.toString(m.getSignature()));
+        PerformanceCollector.instance().add(s, 0, 0);
 
         Logger.debug("    Inserted into method: %s", m.getName());
     }
