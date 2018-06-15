@@ -2,14 +2,14 @@
 Java agent to inspect and count method calls.
 
 This project is a sort of proof-of-concept to count how many times methods have
-been called through a Java program. It comes with a blacklist and whitelist 
-functionality to exclude or include certain packages explicitly. 
+been called through a Java program. It comes with a blacklist and whitelist
+functionality to exclude or include certain packages explicitly.
 
 # Motivation
 
 I created this to test out the Java Instrumentation API. My use case was mainly
 the investigation of finding dead code throughout legacy code my team inherited.
-Perhaps there are better ways (static analysis) but our project uses weird 
+Perhaps there are better ways (static analysis) but our project uses weird
 combinations of Struts 1.0, tag libraries, and finding methods through reflection
 and what not. Many calls could not be checked using a static analysis.
 
@@ -40,6 +40,11 @@ from. The file takes the following format:
 
 ```xml
 <delver>
+    <!-- to start a HTTP server: -->
+    <http>
+        <enabled>true</enabled>
+        <port>8081</port>
+    </http>
     <include>
         <pattern>nl/omgwtfbbq/delver/conf</pattern>
         <pattern>nl/omgwtfbbq/delver/conf/cruft/*$</pattern>
@@ -59,7 +64,7 @@ Note that if you want to include a package for monitoring, you **MUST** provide 
 inclusion. Also, exclusions take precedence over inclusions, so if an exclusion is evaluated,
 an inclusion matching the same regex will not have any effect.
 
-# Gathering results
+# Gathering results via MBeans
 
 The Instrumentation agent will expose functionality through the MBeanServer of the JVM
 its running in. The object name is `nl.omgwtfbbq.delver:type=MethodUsageSampler`. Currently
@@ -104,3 +109,40 @@ which will output something like:
     20   public static  org.eclipse.swt.graphics.Image                  nl.rivium.breakdown.ui.ImageCache             getImage(nl.rivium.breakdown.ui.ImageCache$Icon)
     19   public static  nl.rivium.breakdown.core.jms.DestinationType[]  nl.rivium.breakdown.core.jms.DestinationType  values()
 
+# Gathering results via HTTP
+
+If an HTTP server is started via the configuration file, the results can be viewed
+using any HTTP client by simply browsing to `http://thehost:${port}`. The results displayed are
+in the following format:
+
+    Call count;Max (ms);Average (ms);Total (ms);Modifiers;Returntype;Classname;Methodname
+    2;0;0;0;protected;void;nl.omgwtfbbq.delver.TestRunner$TheClass;abstractMethod()
+    2;0;0;0;public;void;nl.omgwtfbbq.delver.TestRunner$BaseClass;concreteMethodInBaseClass()
+    1;0;0;0;public;void;nl.omgwtfbbq.delver.TestRunner$TheClass;concreteMethod()
+    0;0;0;0;public;java.util.Map;nl.omgwtfbbq.delver.mbeans.MethodUsageSampler;getCallMap()
+    0;0;0;0;public;void;nl.omgwtfbbq.delver.http.TotalsHttpHandler;handle(com.sun.net.httpserver.HttpExchange)
+    0;0;0;0;public;void;nl.omgwtfbbq.delver.http.DelverHttpHandler;handle(com.sun.net.httpserver.HttpExchange)
+    0;0;0;0;public;int;nl.omgwtfbbq.delver.mbeans.MethodUsageSampler;getMethodCount()
+    0;0;0;0;public static;void;nl.omgwtfbbq.delver.TestRunner;main(java.lang.String[])
+    0;0;0;0;public;void;nl.omgwtfbbq.delver.mbeans.MethodUsageSampler;writeToFile(java.lang.String)
+    0;0;0;0;public;void;nl.omgwtfbbq.delver.TestRunner;run()
+    0;0;0;0;public;int;nl.omgwtfbbq.delver.mbeans.MethodUsageSampler;getTotalMethodUsageCount()
+
+Using `awk` you can be a bit flexible in the desired output:
+
+    curl http://localhost:8081 | gawk -F";" '{ print $1 ";" $7 ";" $8 }' | column -s ";" -t
+
+Output:
+
+    Average (ms)  Classname                                      Methodname
+    2             nl.omgwtfbbq.delver.http.DelverHttpHandler     handle(com.sun.net.httpserver.HttpExchange)
+    0             nl.omgwtfbbq.delver.TestRunner$TheClass        abstractMethod()
+    0             nl.omgwtfbbq.delver.TestRunner$BaseClass       concreteMethodInBaseClass()
+    0             nl.omgwtfbbq.delver.TestRunner$TheClass        concreteMethod()
+    0             nl.omgwtfbbq.delver.mbeans.MethodUsageSampler  getCallMap()
+    0             nl.omgwtfbbq.delver.http.TotalsHttpHandler     handle(com.sun.net.httpserver.HttpExchange)
+    0             nl.omgwtfbbq.delver.mbeans.MethodUsageSampler  getMethodCount()
+    0             nl.omgwtfbbq.delver.TestRunner                 main(java.lang.String[])
+    0             nl.omgwtfbbq.delver.mbeans.MethodUsageSampler  writeToFile(java.lang.String)
+    0             nl.omgwtfbbq.delver.TestRunner                 run()
+    0             nl.omgwtfbbq.delver.mbeans.MethodUsageSampler  getTotalMethodUsageCount()
