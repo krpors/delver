@@ -12,7 +12,13 @@ public final class Logger {
 
     private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    public static boolean verbose = true;
+
     public static void debug(String s, Object... args) {
+        if (!verbose) {
+            return;
+        }
+
         System.out.printf("[DELVER] DEBUG [%s]: %s\n",
                 SDF.format(new Date()),
                 String.format(s, args));

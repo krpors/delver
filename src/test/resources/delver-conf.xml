@@ -1,5 +1,5 @@
 <!--setConfig Delver example XML config. -->
-<delver verbose="true">
+<delver verbose="false">
     <http>
         <enabled>true</enabled>
         <port>8081</port>

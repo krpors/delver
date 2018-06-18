@@ -42,6 +42,7 @@ public class DelverMain {
         try {
             fis = new FileInputStream(agentArgs);
             Config config = Config.read(fis);
+            Logger.verbose = config.isVerbose();
 
             Logger.debug("Configuration file read successfully");
             PerformanceTransformer performanceTransformer = new PerformanceTransformer(config);

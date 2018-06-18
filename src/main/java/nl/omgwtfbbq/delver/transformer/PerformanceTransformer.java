@@ -30,16 +30,6 @@ public class PerformanceTransformer extends AbstractMethodTransformer {
         String modifiers = Modifier.toString(m.getModifiers());
         String returnType = m.getReturnType().getName();
 
-        // Make a comma separated String
-        String signature = String.format("%s;%s;%s;%s%s",
-                modifiers,
-                returnType,
-                cc.getName(),
-                m.getName(),
-                Descriptor.toString(m.getSignature()));
-
-        Logger.debug("    Attempting to insert into: %s", m.getLongName());
-
         String code = "{";
         code += "nl.omgwtfbbq.delver.Signature s = new nl.omgwtfbbq.delver.Signature();";
         code += String.format("s.setModifiers(\"%s\");", modifiers);
@@ -47,7 +37,7 @@ public class PerformanceTransformer extends AbstractMethodTransformer {
         code += String.format("s.setClassName(\"%s\");", cc.getName());
         code += String.format("s.setMethod(\"%s\");", m.getName());
         code += String.format("s.setSignature(\"%s\");", Descriptor.toString(m.getSignature()));
-        code += String.format("nl.omgwtfbbq.delver.PerformanceCollector.instance().add(s, delver_pkg_start, System.currentTimeMillis());");
+        code += "nl.omgwtfbbq.delver.PerformanceCollector.instance().add(s, delver_pkg_start, System.currentTimeMillis());";
         code += "}";
 
         if (Modifier.isAbstract(m.getModifiers())) {

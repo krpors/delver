@@ -6,6 +6,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -17,6 +18,9 @@ import java.util.List;
 @XmlRootElement(name = "delver")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Config {
+
+    @XmlAttribute
+    private boolean verbose;
 
     @XmlElement(name = "http")
     private HttpConfig httpConfig;
@@ -74,6 +78,14 @@ public class Config {
 
     public List<Pattern> getExcludes() {
         return listExcludes;
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
     }
 
     public HttpConfig getHttpConfig() {
