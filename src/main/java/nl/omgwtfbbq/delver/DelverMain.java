@@ -78,14 +78,6 @@ public class DelverMain {
             Logger.error("Unable to open configuration file '%s', disabling instrumentation.", agentArgs);
         } catch (IOException e) {
             Logger.error("Unable to start HTTP server: %s", e.getMessage());
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    // swallow.
-                }
-            }
         }
 
         try {

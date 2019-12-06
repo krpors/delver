@@ -58,7 +58,7 @@ public final class PerformanceCollector {
                         break;
                     }
                 }
-            } catch (FileNotFoundException | JAXBException e) {
+            } catch (IOException | JAXBException e) {
                 Logger.error("error occurred verifying weather the call was made " +
                         "from the files in the given pattern . Error : {}", e);
             }
