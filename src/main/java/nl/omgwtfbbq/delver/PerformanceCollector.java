@@ -1,5 +1,10 @@
 package nl.omgwtfbbq.delver;
 
+import nl.omgwtfbbq.delver.conf.Config;
+import nl.omgwtfbbq.delver.conf.ReadConfig;
+
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -41,9 +46,27 @@ public final class PerformanceCollector {
      */
     public void add(final Signature signature, long start, long end) {
         if (calls.containsKey(signature)) {
-            Metric m = calls.get(signature);
-            m.update(start, end);
-            calls.put(signature, m);
+            ReadConfig readConfig = null;
+            boolean calledFromInsidePackage = false;
+            try {
+                readConfig = ReadConfig.getConfigInstance("random");
+                Config config = readConfig.getConfig();
+                StackTraceElement[] stackTraceElements = new Exception().getStackTrace();
+                for (StackTraceElement stackTraceElement : stackTraceElements) {
+                    if(!signature.getClassName().equals(stackTraceElement.getClassName()) && config.isIncluded(stackTraceElement.getClassName().replace('.', '/'))){
+                        calledFromInsidePackage = true;
+                        break;
+                    }
+                }
+            } catch (FileNotFoundException | JAXBException e) {
+                Logger.error("error occurred verifying weather the call was made " +
+                        "from the files in the given pattern . Error : {}", e);
+            }
+            if(!calledFromInsidePackage) {
+                Metric m = calls.get(signature);
+                m.update(start, end);
+                calls.put(signature, m);
+            }
         } else {
             Metric m = new Metric();
             m.setSignature(signature);
