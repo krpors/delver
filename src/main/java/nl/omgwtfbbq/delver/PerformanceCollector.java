@@ -4,13 +4,11 @@ import nl.omgwtfbbq.delver.conf.Config;
 import nl.omgwtfbbq.delver.conf.ReadConfig;
 
 import javax.xml.bind.JAXBException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 // TODO: do performance tests on the usage of ConcurrentHashmap.
 
@@ -46,16 +44,18 @@ public final class PerformanceCollector {
      */
     public void add(final Signature signature, long start, long end) {
         if (calls.containsKey(signature)) {
-            ReadConfig readConfig = null;
+            ReadConfig readConfig;
             boolean calledFromInsidePackage = false;
             try {
                 readConfig = ReadConfig.getConfigInstance("random");
                 Config config = readConfig.getConfig();
-                StackTraceElement[] stackTraceElements = new Exception().getStackTrace();
-                for (StackTraceElement stackTraceElement : stackTraceElements) {
-                    if(!signature.getClassName().equals(stackTraceElement.getClassName()) && config.isIncluded(stackTraceElement.getClassName().replace('.', '/'))){
-                        calledFromInsidePackage = true;
-                        break;
+                if(config.isSelfCallFilterEnabled()) {
+                    StackTraceElement[] stackTraceElements = new Exception().getStackTrace();
+                    for (StackTraceElement stackTraceElement : stackTraceElements) {
+                        if (!signature.getClassName().equals(stackTraceElement.getClassName()) && config.isIncluded(stackTraceElement.getClassName().replace('.', '/'))) {
+                            calledFromInsidePackage = true;
+                            break;
+                        }
                     }
                 }
             } catch (IOException | JAXBException e) {
