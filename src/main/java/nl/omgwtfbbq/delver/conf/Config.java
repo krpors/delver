@@ -25,6 +25,9 @@ public class Config {
     @XmlElement(name = "http")
     private HttpConfig httpConfig;
 
+    @XmlElement(name = "selfcallfilter")
+    private boolean selfCallFilterEnabled;
+
     @XmlElementWrapper(name = "include")
     @XmlElement(name = "pattern")
     private List<Pattern> listIncludes = new ArrayList<Pattern>();
@@ -122,6 +125,14 @@ public class Config {
         }
 
         return false;
+    }
+
+    public boolean isSelfCallFilterEnabled() {
+        return selfCallFilterEnabled;
+    }
+
+    public void setSelfCallFilterEnabled(boolean selfCallFilterEnabled) {
+        this.selfCallFilterEnabled = selfCallFilterEnabled;
     }
 
     /**

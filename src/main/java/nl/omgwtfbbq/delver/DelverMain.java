@@ -2,6 +2,7 @@ package nl.omgwtfbbq.delver;
 
 import com.sun.net.httpserver.HttpServer;
 import nl.omgwtfbbq.delver.conf.Config;
+import nl.omgwtfbbq.delver.conf.ReadConfig;
 import nl.omgwtfbbq.delver.http.DelverHttpHandler;
 import nl.omgwtfbbq.delver.http.TotalsHttpHandler;
 import nl.omgwtfbbq.delver.mbeans.MethodUsageSampler;
@@ -40,10 +41,12 @@ public class DelverMain {
 
         FileInputStream fis = null;
         try {
-            fis = new FileInputStream(agentArgs);
-            Config config = Config.read(fis);
-            Logger.verbose = config.isVerbose();
+//            fis = new FileInputStream(agentArgs);
+//            Config config = Config.read(fis);
+//            Logger.verbose = config.isVerbose();
 
+            ReadConfig readConfig = ReadConfig.getConfigInstance(agentArgs);
+            Config config = readConfig.getConfig();
             Logger.debug("Configuration file read successfully");
             PerformanceTransformer performanceTransformer = new PerformanceTransformer(config);
             inst.addTransformer(performanceTransformer);
@@ -75,14 +78,6 @@ public class DelverMain {
             Logger.error("Unable to open configuration file '%s', disabling instrumentation.", agentArgs);
         } catch (IOException e) {
             Logger.error("Unable to start HTTP server: %s", e.getMessage());
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    // swallow.
-                }
-            }
         }
 
         try {
